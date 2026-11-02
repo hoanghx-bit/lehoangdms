@@ -683,6 +683,10 @@
                         <i data-lucide="search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:#64748b"></i>
                         <input type="search" id="order-customer-search" class="form-control" placeholder="Tìm theo tên khách hàng..." oninput="renderOrderCustomerVisits()" style="width:100%;padding-left:36px">
                     </div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px">
+                        <button type="button" class="btn btn-primary btn-sm" id="order-locate-btn" onclick="refreshCurrentPosition()"><i data-lucide="locate-fixed"></i> Lấy vị trí hiện tại</button>
+                        <span id="order-location-status" style="font-size:11px;color:#64748b">Chưa lấy vị trí thiết bị</span>
+                    </div>
                     <div id="order-customer-visit-list"></div>
                 </div>
                 <div class="card" id="order-entry-form-card" style="display:none">
@@ -899,13 +903,14 @@
         <div class="card">
           <div class="card-header"><span>Danh bạ khách hàng / Cửa hàng</span><button class="btn btn-primary btn-sm" id="toggle-customer-form-btn" onclick="toggleCustomerForm()"><i data-lucide="user-plus"></i> Thêm khách hàng mới</button></div>
           <div id="customer-form-wrap" style="display:none">
+            <input type="hidden" id="cust-edit-id" value="">
             <div class="form-group"><label>Tên khách hàng / cửa hàng</label><input id="cust-name" class="form-control" placeholder="Tên cửa hàng"></div>
             <div class="form-group" style="margin-top:8px"><label>Địa chỉ</label><input id="cust-address" class="form-control" placeholder="Địa chỉ cửa hàng"></div>
             <div class="form-grid" style="grid-template-columns:1fr 1fr;margin-top:8px">
               <div class="form-group"><label>Ngày viếng thăm</label><select id="cust-day" class="form-control"><option value="1">Thứ 2</option><option value="2">Thứ 3</option><option value="3">Thứ 4</option><option value="4">Thứ 5</option><option value="5">Thứ 6</option><option value="6">Thứ 7</option></select></div>
               <div class="form-group"><label>Điện thoại</label><input id="cust-phone" class="form-control" placeholder="Số điện thoại"></div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-primary" onclick="saveCustomer()"><i data-lucide="user-plus"></i> Lưu khách hàng</button><button class="btn btn-secondary" onclick="toggleCustomerForm(false)">Hủy</button></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-primary" id="cust-save-btn" onclick="saveCustomer()"><i data-lucide="user-plus"></i> Lưu khách hàng</button><button class="btn btn-secondary" onclick="toggleCustomerForm(false)">Hủy</button></div>
             <p style="font-size:12px;color:#64748b;margin-top:8px">Dùng nút “Ghim vị trí” ở từng khách hàng để lưu vị trí cửa hàng.</p>
           </div>
           <p id="customer-sync-status" style="font-size:12px;color:#64748b;margin-top:4px">Đồng bộ Firestore đang khởi tạo…</p>
@@ -1007,10 +1012,10 @@
             }
         };
 
-        // Danh sách các ngày nghỉ lễ được cài đặt (Định dạng: YYYY-MM-DD)[cite: 2]
+        // Danh sách các ngày nghỉ lễ được cài đặt (Định dạng: YYYY-MM-DD)
         const holidaySettings = ['2026-09-02', '2026-09-03'];
 
-        // Hàm tính toán số ngày nghỉ hợp lệ để trừ đi[cite: 2]
+        // Hàm tính toán số ngày nghỉ hợp lệ để trừ đi
         function getActualWorkingDays(currentCalculatedDays, holidaysArray) {
             if (!currentCalculatedDays || currentCalculatedDays <= 0) return 0;
             const holidayCount = holidaysArray.length; 
@@ -1018,7 +1023,7 @@
             return finalDays > 0 ? finalDays : 0;
         }
 
-        // Hàm hỗ trợ lọc ra các ngày lễ nằm trong khoảng thời gian đã cho (không tính trùng chủ nhật)[cite: 2]
+        // Hàm hỗ trợ lọc ra các ngày lễ nằm trong khoảng thời gian đã cho (không tính trùng chủ nhật)
         function getHolidaysInRange(fromDate, toDate) {
             return holidaySettings.filter(h => {
                 const hDate = new Date(h); hDate.setHours(0,0,0,0);
@@ -1096,11 +1101,10 @@
             renderCurrentMonthDiff();
             const todayDay = new Date().getDay();
             document.getElementById('customer-day-filter').value = 'today';
-            document.getElementById('order-customer-day-filter').value = 'today';
-            const orderCustomerDateFilter = document.getElementById('order-customer-date-filter');
-            if (orderCustomerDateFilter) orderCustomerDateFilter.value = localDateKey();
+            document.getElementById('order-customer-status-filter').value = 'all';
             renderCustomers();
             renderOrderCustomerVisits();
+            ensureOrderLocation();
             const orderForm = document.getElementById('order-entry-form-card');
             const tempOrder = document.getElementById('temp-order-card');
             if (orderForm) orderForm.style.display = 'none';
@@ -1155,7 +1159,7 @@
             };
             document.getElementById('page-title').innerText = titles[tabId];
             if(tabId === 'tab-dashboard') renderDashboard();
-            if(tabId === 'tab-order') { updateProductSelect(); renderOrderCustomerVisits(); }
+            if(tabId === 'tab-order') { updateProductSelect(); renderOrderCustomerVisits(); ensureOrderLocation(); }
             if(tabId === 'tab-inventory') renderInventory();
             if(tabId === 'tab-history') renderHistory();
             if(tabId === 'tab-stats') { renderStats(); renderCurrentMonthDiff(); }
@@ -1470,8 +1474,20 @@
             renderOrderCustomerVisits();
         }
 
+        // Hàm lấy tên khách hàng và địa chỉ định dạng chữ nghiêng theo yêu cầu
+        function getCustomerDisplayString(customerName) {
+            if (!customerName) return '';
+            const cleanName = customerName.trim();
+            const found = customersData.find(c => String(c.name || '').trim().toLowerCase() === cleanName.toLowerCase());
+            if (found && found.address && found.address.trim() !== '') {
+                return `${found.name}, <i>${found.address.trim()}</i>`;
+            }
+            return cleanName;
+        }
+
         function generateOrderHtml(order, index) {
-            let html = `<div style="font-weight: 700; font-size: 15px; margin-bottom: 6px; color: #0f172a;">${index + 1}. ${order.customer}</div>`;
+            let custDisplay = getCustomerDisplayString(order.customer);
+            let html = `<div style="font-weight: 700; font-size: 15px; margin-bottom: 6px; color: #0f172a;">${index + 1}. ${custDisplay}</div>`;
             html += `<table class="history-print-table" style="border-collapse: collapse; border: none; font-family: Arial, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.3;">`;
             let totalRaw = 0;
             order.items.forEach(item => {
@@ -1964,7 +1980,7 @@
             return count;
         }
 
-        // Tích hợp logic trừ ngày nghỉ lễ vào tính toán ngày làm việc[cite: 2]
+        // Tích hợp logic trừ ngày nghỉ lễ vào tính toán ngày làm việc
         function getMonthWorkingInfo(monthKey) {
             const [year, month] = monthKey.split('-').map(Number);
             const firstDay = new Date(year, month - 1, 1);
@@ -2162,7 +2178,6 @@
             const today = localDateKey();
             if (!status[today]) status[today] = {};
             status[today][String(currentVisitCustomerId)] = true;
-            // Giữ lịch sử trạng thái trong 60 ngày gần nhất để dữ liệu không tăng vô hạn.
             Object.keys(status).sort().slice(0, Math.max(0, Object.keys(status).length - 60)).forEach(day => delete status[day]);
             safeSetItem('dms_customer_visit_status', JSON.stringify(status));
             currentVisitCustomerId = null;
@@ -2176,33 +2191,119 @@
             if (btn) btn.innerHTML = shouldOpen
                 ? '<i data-lucide="x"></i> Đóng biểu mẫu'
                 : '<i data-lucide="user-plus"></i> Thêm khách hàng mới';
+            if (!shouldOpen) resetCustomerForm();
             safeCreateIcons();
             if (shouldOpen) document.getElementById('cust-name')?.focus();
         }
-
+        function resetCustomerForm() {
+            ['cust-edit-id','cust-name','cust-address','cust-phone'].forEach(id => {
+                const el=document.getElementById(id); if(el) el.value='';
+            });
+            const day=document.getElementById('cust-day'); if(day) day.value='1';
+            const saveBtn=document.getElementById('cust-save-btn');
+            if(saveBtn) saveBtn.innerHTML='<i data-lucide="user-plus"></i> Lưu khách hàng';
+        }
+        function editCustomer(id) {
+            const customer=customersData.find(c=>String(customerIdOf(c))===String(id));
+            if(!customer) return alert('Không tìm thấy khách hàng cần sửa.');
+            document.getElementById('cust-edit-id').value=String(customerIdOf(customer));
+            document.getElementById('cust-name').value=customer.name||'';
+            document.getElementById('cust-address').value=customer.address||'';
+            document.getElementById('cust-phone').value=customer.phone||'';
+            document.getElementById('cust-day').value=String(normalizedCustomerDay(customer)||1);
+            document.getElementById('customer-form-wrap').style.display='block';
+            const btn=document.getElementById('toggle-customer-form-btn');
+            if(btn) btn.innerHTML='<i data-lucide="x"></i> Đóng biểu mẫu';
+            const saveBtn=document.getElementById('cust-save-btn');
+            if(saveBtn) saveBtn.innerHTML='<i data-lucide="save"></i> Cập nhật khách hàng';
+            safeCreateIcons();
+            document.getElementById('cust-name')?.focus();
+            document.getElementById('customer-form-wrap')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+        }
         function saveCustomer() {
             const name = document.getElementById('cust-name').value.trim();
             if (!name) return alert('Vui lòng nhập tên khách hàng/cửa hàng.');
-            const customer = {id:Date.now(), name, address:document.getElementById('cust-address').value.trim(), day:Number(document.getElementById('cust-day').value), phone:document.getElementById('cust-phone').value.trim(), lat:null, lon:null};
-            customersData.push(customer); safeSetItem('dms_customers', JSON.stringify(customersData));
+            const editId=document.getElementById('cust-edit-id').value;
+            let customer;
+            if(editId) {
+                customer=customersData.find(c=>String(customerIdOf(c))===String(editId));
+                if(!customer) return alert('Khách hàng không còn tồn tại. Vui lòng tải lại danh sách.');
+                Object.assign(customer,{
+                    name,
+                    address:document.getElementById('cust-address').value.trim(),
+                    day:Number(document.getElementById('cust-day').value),
+                    phone:document.getElementById('cust-phone').value.trim()
+                });
+            } else {
+                customer = {id:Date.now(), name, address:document.getElementById('cust-address').value.trim(), day:Number(document.getElementById('cust-day').value), phone:document.getElementById('cust-phone').value.trim(), lat:null, lon:null};
+                customersData.push(customer);
+            }
+            safeSetItem('dms_customers', JSON.stringify(customersData));
             if (window.saveCustomerToCloud) window.saveCustomerToCloud(customer);
-            ['cust-name','cust-address','cust-phone'].forEach(id=>document.getElementById(id).value='');
+            resetCustomerForm();
             toggleCustomerForm(false);
             renderCustomers(); renderOrderCustomerVisits();
+            const status=document.getElementById('customer-sync-status');
+            if(status) status.textContent=editId?'Đã cập nhật thông tin khách hàng trên thiết bị; đang đồng bộ Firestore…':'Đã thêm khách hàng; đang đồng bộ Firestore…';
         }
-        function getPosition(success) {
-            if (!navigator.geolocation) return alert('Trình duyệt không hỗ trợ định vị.');
-            navigator.geolocation.getCurrentPosition(pos=>{currentPosition={lat:pos.coords.latitude,lon:pos.coords.longitude}; success && success(pos);}, err=>alert('Không lấy được vị trí. Hãy bật GPS và cấp quyền định vị.'), {enableHighAccuracy:true, timeout:12000, maximumAge:10000});
+        function updateOrderLocationStatus(message, isError=false) {
+            const el=document.getElementById('order-location-status');
+            if(el){el.textContent=message;el.style.color=isError?'#b91c1c':'#15803d';}
         }
-        function haversine(a,b) { const r=6371000, rad=x=>x*Math.PI/180, dLat=rad(b.lat-a.lat), dLon=rad(b.lon-a.lon); const h=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2; return 2*r*Math.asin(Math.sqrt(h)); }
+        function getPosition(success, failure) {
+            if (!navigator.geolocation) {
+                const msg='Trình duyệt không hỗ trợ định vị GPS.';
+                updateOrderLocationStatus(msg,true); if(failure) failure(new Error(msg)); else alert(msg); return;
+            }
+            updateOrderLocationStatus('Đang xác định vị trí thiết bị…');
+            navigator.geolocation.getCurrentPosition(pos=>{
+                currentPosition={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy};
+                updateOrderLocationStatus('Đã lấy vị trí · sai số khoảng '+Math.round(pos.coords.accuracy||0)+' m');
+                if(success) success(pos);
+            }, err=>{
+                const reasons={1:'Bạn chưa cấp quyền vị trí. Hãy cho phép truy cập vị trí trong trình duyệt.',2:'Không xác định được vị trí. Kiểm tra GPS hoặc kết nối mạng.',3:'Hết thời gian chờ GPS. Hãy thử lấy vị trí lại.'};
+                const msg=reasons[err.code]||'Không lấy được vị trí thiết bị.';
+                updateOrderLocationStatus(msg,true);
+                if(failure) failure(err); else alert(msg);
+            }, {enableHighAccuracy:true, timeout:20000, maximumAge:0});
+        }
+        function refreshCurrentPosition() {
+            const button=document.getElementById('order-locate-btn');
+            if(button){button.disabled=true;button.textContent='Đang lấy vị trí…';}
+            getPosition(()=>{
+                renderOrderCustomerVisits();
+                startCustomerTracking();
+                if(button){button.disabled=false;button.innerHTML='<i data-lucide="locate-fixed"></i> Cập nhật vị trí';safeCreateIcons();}
+            },()=>{
+                if(button){button.disabled=false;button.innerHTML='<i data-lucide="locate-fixed"></i> Thử lại vị trí';safeCreateIcons();}
+            });
+        }
+        let orderLocationRequested = false;
+        function ensureOrderLocation() {
+            if(currentPosition) { renderOrderCustomerVisits(); startCustomerTracking(); return; }
+            if(orderLocationRequested) return;
+            orderLocationRequested=true;
+            getPosition(()=>{
+                renderOrderCustomerVisits();
+                startCustomerTracking();
+            },()=>{orderLocationRequested=false;});
+        }
+        function haversine(a,b) {
+            const r=6371000, rad=x=>x*Math.PI/180, dLat=rad(b.lat-a.lat), dLon=rad(b.lon-a.lon);
+            const h=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2;
+            return 2*r*Math.asin(Math.sqrt(Math.min(1,h)));
+        }
         let customerWatchId = null;
         function startCustomerTracking() {
             if (!navigator.geolocation || customerWatchId !== null) return;
             customerWatchId = navigator.geolocation.watchPosition(pos => {
-                currentPosition = {lat:pos.coords.latitude, lon:pos.coords.longitude};
+                currentPosition = {lat:pos.coords.latitude, lon:pos.coords.longitude, accuracy:pos.coords.accuracy};
+                updateOrderLocationStatus('Đang cập nhật GPS · sai số '+Math.round(pos.coords.accuracy||0)+' m');
                 if (document.getElementById('tab-customers').classList.contains('active')) renderCustomers();
                 if (document.getElementById('tab-order').classList.contains('active')) renderOrderCustomerVisits();
-            }, () => {}, {enableHighAccuracy:true, maximumAge:5000, timeout:15000});
+            }, err => {
+                if(err.code===1) updateOrderLocationStatus('Quyền GPS đã bị từ chối. Kiểm tra cài đặt trình duyệt.',true);
+            }, {enableHighAccuracy:true, maximumAge:5000, timeout:20000});
         }
         function weekdayForCustomerFilter(value) {
             if (value === 'today') { const d = new Date().getDay(); return d === 0 ? 6 : d; }
@@ -2235,7 +2336,7 @@
             const filter=document.getElementById('customer-day-filter');
             if(filter && !filter.dataset.initialized){filter.value='today';filter.dataset.initialized='1';}
             const rows=customerRowsForFilter(filter ? filter.value : 'today');
-            list.innerHTML=rows.length?rows.map(c=>`<div class="customer-row ${c.distance<=100?'near':''}"><div><strong>${c.name}</strong><div class="customer-meta">${c.address||'Chưa có địa chỉ'}${c.phone?' · '+c.phone:''}</div><div class="customer-meta">Tuyến: ${Number.isFinite(c.day)?('Thứ '+(c.day===6?'7':c.day+1)):'Chưa đặt ngày'} · ${Number.isFinite(c.distance)?(c.distance<1000?Math.round(c.distance)+' m':(c.distance/1000).toFixed(1)+' km'):'Chưa có khoảng cách'} ${c.distance<=100?' · GẦN VỊ TRÍ HIỆN TẠI':''}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" onclick="selectCustomerForLocation('${c.id}')">Ghim vị trí khách</button><button class="btn btn-primary btn-sm" onclick="visitCustomer('${c.id}')"><i data-lucide="map-pin-check"></i> Viếng thăm</button><button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">×</button></div></div>`).join(''):'<div style="padding:20px;color:#64748b;text-align:center">Chưa có khách hàng cho lựa chọn này.</div>';
+            list.innerHTML=rows.length?rows.map(c=>`<div class="customer-row ${c.distance<=100?'near':''}"><div><strong>${c.name}</strong><div class="customer-meta">${c.address||'Chưa có địa chỉ'}${c.phone?' · '+c.phone:''}</div><div class="customer-meta">Tuyến: ${Number.isFinite(c.day)?('Thứ '+(c.day===6?'7':c.day+1)):'Chưa đặt ngày'} · ${Number.isFinite(c.distance)?(c.distance<1000?Math.round(c.distance)+' m':(c.distance/1000).toFixed(1)+' km'):'Chưa có khoảng cách'} ${c.distance<=100?' · GẦN VỊ TRÍ HIỆN TẠI':''}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" onclick="editCustomer('${c.id}')"><i data-lucide="pencil"></i> Sửa</button><button class="btn btn-secondary btn-sm" onclick="selectCustomerForLocation('${c.id}')">Ghim vị trí khách</button><button class="btn btn-primary btn-sm" onclick="visitCustomer('${c.id}')"><i data-lucide="map-pin-check"></i> Viếng thăm</button><button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">×</button></div></div>`).join(''):'<div style="padding:20px;color:#64748b;text-align:center">Chưa có khách hàng cho lựa chọn này.</div>';
             safeCreateIcons();
         }
         function customerHasOrderOnDate(customer, dateKey = localDateKey()) {
@@ -2284,6 +2385,14 @@
                 .map(c=>({...c,distance:currentPosition && c.lat!=null && c.lon!=null ? haversine(currentPosition,{lat:Number(c.lat),lon:Number(c.lon)}) : Infinity,hasOrder:customerHasOrderOnDate(c,selectedDate),visited:isCustomerVisitedOnDate(c.id,selectedDate)}))
                 .filter(c => !searchTerm || String(c.name || '').toLocaleLowerCase('vi').includes(searchTerm))
                 .filter(c => statusFilter==='all' || (statusFilter==='orders' && c.hasOrder) || (statusFilter==='visited' && c.visited) || (statusFilter==='not-visited' && !c.visited));
+            
+            // Mặc định sắp xếp theo khoảng cách (gần nhất → xa nhất)
+            rows.sort((a,b)=>{
+                const av=Number.isFinite(a.distance)?a.distance:Infinity;
+                const bv=Number.isFinite(b.distance)?b.distance:Infinity;
+                return av-bv || String(a.name||'').localeCompare(String(b.name||''),'vi',{sensitivity:'base'});
+            });
+
             list.innerHTML=rows.length?rows.map(c=>{
                 const visited=c.visited;
                 const hasOrder=c.hasOrder;
@@ -2303,7 +2412,6 @@
             }).join(''):'<div style="padding:18px;color:#64748b;text-align:center">'+(searchTerm?'Không tìm thấy khách hàng phù hợp.':'Chưa có khách hàng cho lựa chọn này. Thêm khách tại tab “Khách hàng / Tuyến”.')+'</div>';
             safeCreateIcons();
         }
-        // Ghim vị trí riêng cho đúng một khách hàng được chọn; không cập nhật tọa độ các khách khác.
         function selectCustomerForLocation(id){
             const c=customersData.find(x=>String(x.id)===String(id)); if(!c)return;
             getPosition(()=>{
@@ -2318,7 +2426,6 @@
             const customer = customersData.find(c => String(customerIdOf(c)) === String(id) || String(c._firestoreDocId || '') === String(id));
             if(!customer || !confirm('Xóa khách hàng “' + customer.name + '”?')) return;
             const status = document.getElementById('customer-sync-status');
-            // Tombstone prevents the live Firestore listener from re-uploading a deleted local record.
             const tombstones = new Set(JSON.parse(safeGetItem('dms_deleted_customer_ids') || '[]').map(String));
             tombstones.add(String(id));
             if (customerIdOf(customer) != null) tombstones.add(String(customerIdOf(customer)));
@@ -2331,7 +2438,6 @@
             if (window.deleteCustomerFromCloud) {
                 const ok = await window.deleteCustomerFromCloud(customerIdOf(customer) ?? id, customer._firestoreDocId);
                 if (!ok) {
-                    // Keep the item deleted locally; tombstone ensures it cannot reappear on next snapshot.
                     if (status) { status.textContent = 'Đã ẩn khách tại thiết bị nhưng Firestore chưa cho phép xóa. Kiểm tra Security Rules (delete) hoặc quyền đăng nhập.'; status.style.color = '#b45309'; }
                     return;
                 }
@@ -2411,8 +2517,6 @@
             window.deleteProductFromCloud = async function(productId) { try { await deleteDoc(doc(db, "inventory", String(productId))); } catch(e) {} };
             window.saveTargetToCloud = async function(monthKey, targetObj) { try { await setDoc(doc(db, "targets", monthKey), { month: monthKey, ...targetObj }); } catch(e) {} };
 
-            // Đồng bộ danh bạ khách hàng hai chiều với Firestore.
-            // Dấu xóa được lưu trên Firestore để không bị mất khi người dùng xóa dữ liệu trình duyệt.
             const customerStatus = () => document.getElementById("customer-sync-status");
             const customerKey = value => String(value ?? "").trim();
             async function readCloudDeletedCustomerIds() {
@@ -2468,7 +2572,6 @@
                     deletedIds.delete(customerKey(customer.id));
                     deletedIds.delete(customerKey(String(customer.id)));
                     safeSetItem("dms_deleted_customer_ids", JSON.stringify([...deletedIds]));
-                    // Khi thêm lại một khách đã xóa, gỡ dấu xóa trên cloud trước khi lưu.
                     await deleteDoc(doc(db, "deletedCustomers", String(customer.id))).catch(() => {});
                     await setDoc(doc(db, "customers", String(customer.id)), customer);
                     const status = customerStatus();
@@ -2485,7 +2588,6 @@
             window.deleteCustomerFromCloud = async function(customerId, firestoreDocId) {
                 const id = customerKey(customerId);
                 try {
-                    // Ghi dấu xóa lên cloud trước. Dấu này vẫn còn sau khi xóa cache/localStorage.
                     await setDoc(doc(db, "deletedCustomers", id), {
                         id,
                         firestoreDocId: firestoreDocId || id,
@@ -2493,7 +2595,6 @@
                     });
                     const idsToDelete = new Set([id]);
                     if (firestoreDocId) idsToDelete.add(String(firestoreDocId));
-                    // Quét collection để xử lý dữ liệu cũ có document ID khác hoặc id lưu dạng chuỗi/số.
                     const allCustomers = await getDocs(collection(db, "customers"));
                     allCustomers.forEach(d => {
                         const data = d.data() || {};
