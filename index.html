@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Phân Phối - DMS Pro</title>
+    <title>DMS Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -463,7 +463,70 @@
 
         /* Bảng bán chạy quy đổi về thùng; KPI thống kê gọn nhưng không cắt nội dung */
         .best-selling-detail { color:#64748b; font-size:11px; font-weight:400; margin-top:3px; }
-        #tab-dashboard #best-selling-body td:last-child { white-space:normal; min-width:130px; }
+        #tab-dashboard #best-selling-body td:last-child { white-space:normal; min-width:0; }
+        .dash-two-col {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: stretch;
+        }
+        .dash-two-col > .dash-half-card {
+            margin-bottom: 0;
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .dash-two-col .card-header {
+            font-size: 12px;
+            gap: 4px;
+            flex-wrap: wrap;
+            line-height: 1.3;
+        }
+        .dash-two-col .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            flex: 1;
+        }
+        .dash-two-col table {
+            width: 100%;
+            table-layout: fixed;
+        }
+        .dash-two-col th,
+        .dash-two-col td {
+            padding: 7px 5px;
+            font-size: 11px;
+            vertical-align: top;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .dash-two-col th:first-child,
+        .dash-two-col td:first-child {
+            width: 26px;
+            text-align: center;
+            padding-left: 3px;
+            padding-right: 2px;
+        }
+        /* Luôn 2 cột cạnh nhau; thu gọn trên mobile để không tràn */
+        @media (max-width: 760px) {
+            .dash-two-col { gap: 6px; margin-bottom: 10px; }
+            .dash-two-col .dash-half-card { padding: 9px 7px; border-radius: 9px; }
+            .dash-two-col .card-header { font-size: 10px; padding-bottom: 5px; margin-bottom: 5px; }
+            .dash-two-col th,
+            .dash-two-col td { padding: 5px 2px; font-size: 10px; }
+            .dash-two-col th:first-child,
+            .dash-two-col td:first-child { width: 18px; }
+            /* Ẩn cột Số đơn trên mobile cho gọn */
+            .dash-two-col table thead tr th:nth-child(4),
+            .dash-two-col table tbody tr td:nth-child(4) { display: none; }
+        }
+        @media (max-width: 380px) {
+            .dash-two-col { gap: 5px; }
+            .dash-two-col .card-header { font-size: 9px; }
+            .dash-two-col th,
+            .dash-two-col td { font-size: 9px; padding: 4px 2px; }
+        }
         #tab-stats .month-diff-card { padding:12px 15px; gap:10px; margin-bottom:12px; border-radius:10px; }
         #tab-stats .month-diff-controls { padding-bottom:9px; gap:8px; }
         #tab-stats .month-diff-label { font-size:11px !important; line-height:1.35; letter-spacing:.15px; }
@@ -479,18 +542,113 @@
         #tab-stats .stats-toolbar-item { min-width:125px; }
         #tab-stats .stats-toolbar label { font-size:11px !important; margin-bottom:4px !important; }
         @media(max-width:900px) { #tab-stats .kpi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-        /* Dashboard: thu gọn KPI, vẫn hiển thị đủ nhãn và giá trị */
-        #tab-dashboard .dash-hero { padding:13px 15px; margin-bottom:10px; }
-        #tab-dashboard .dash-hero-title { font-size:11px; line-height:1.35; }
-        #tab-dashboard .dash-hero-sub { font-size:11px; line-height:1.4; margin-top:3px; }
-        #tab-dashboard .dash-hero-grid { gap:8px; margin-top:10px; }
-        #tab-dashboard .dash-hero-metric { min-width:0; padding:9px 10px; }
-        #tab-dashboard .dash-hero-metric .label { font-size:10px; line-height:1.35; overflow-wrap:anywhere; }
-        #tab-dashboard .dash-hero-metric .value { font-size:clamp(15px,1.45vw,19px); line-height:1.3; margin-top:4px; overflow-wrap:anywhere; }
-        #tab-dashboard .dash-summary-grid { gap:8px; margin-bottom:10px; }
+        /* Dashboard: thu gọn KPI + thẻ mục tiêu ngày còn lại */
+        #tab-dashboard .dash-hero { padding:9px 11px; margin-bottom:8px; border-radius:10px; }
+        #tab-dashboard .dash-hero-top {
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+        }
+        #tab-dashboard .dash-hero-title { font-size:10px; line-height:1.3; letter-spacing:.4px; }
+        #tab-dashboard .dash-hero-sub { font-size:10px; line-height:1.3; margin-top:2px; }
+        #tab-dashboard .dash-hero-grid { gap:6px; margin-top:0; }
+        #tab-dashboard .dash-hero-metric { min-width:0; padding:7px 8px; border-radius:8px; }
+        #tab-dashboard .dash-hero-metric .label { font-size:9px; line-height:1.3; margin-bottom:3px; overflow-wrap:anywhere; }
+        #tab-dashboard .dash-hero-metric .value { font-size:clamp(13px,1.35vw,17px); line-height:1.25; margin-top:0; overflow-wrap:anywhere; }
+        #tab-dashboard .dash-summary-grid,
+        #tab-dashboard .dash-summary-grid.dash-summary-3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 10px;
+        }
         #tab-dashboard .dash-summary-item { min-width:0; padding:10px 12px; gap:4px; }
         #tab-dashboard .dash-summary-item .label { font-size:10px; line-height:1.35; overflow-wrap:anywhere; }
         #tab-dashboard .dash-summary-item .value { font-size:clamp(15px,1.5vw,19px); line-height:1.3; margin-top:2px; overflow-wrap:anywhere; }
+        /* Thu gọn thẻ thiết lập mục tiêu + mức khoán */
+        #tab-dashboard > .card:first-child {
+            padding: 10px 12px;
+            margin-bottom: 8px;
+        }
+        #tab-dashboard > .card:first-child .card-header {
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            font-size: 13px;
+        }
+        #tab-dashboard > .card:first-child .target-form { gap: 8px; }
+        #tab-dashboard > .card:first-child .form-group label { font-size: 11px; }
+        #tab-dashboard > .card:first-child .form-control {
+            padding: 6px 9px;
+            min-height: 32px;
+            font-size: 12px;
+        }
+        #tab-dashboard > .card:first-child .btn { padding: 6px 10px; font-size: 12px; }
+        #btn-edit-targets {
+            padding: 5px 8px;
+            min-width: 32px;
+            justify-content: center;
+        }
+        .dash-target-level-card {
+            background: #fff;
+            border: 1px solid #e6ebf2;
+            border-radius: 10px;
+            box-shadow: var(--app-shadow);
+            padding: 8px 10px;
+            margin-bottom: 8px;
+        }
+        .dash-target-level-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .dash-target-level-options {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+        }
+        .dash-level-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .dash-level-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .dash-level-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: #475569;
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            transition: all .18s ease;
+        }
+        .dash-level-option input:checked + .dash-level-circle {
+            color: #fff;
+            background: #2563eb;
+            border-color: #1d4ed8;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .16);
+        }
+        .dash-level-option:hover .dash-level-circle { border-color: #60a5fa; }
+        .dash-level-hint {
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748b;
+            text-align: center;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+        .dash-level-option input:checked ~ .dash-level-hint { color: #1d4ed8; }
         #tab-order .order-customer-filter-panel { display:grid; grid-template-columns:minmax(0,1fr); gap:10px; padding:12px; margin:-4px 0 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; }
         #tab-order .order-filter-field { min-width:0; display:flex; flex-direction:column; gap:7px; }
         #tab-order .order-filter-field label { font-size:11px; font-weight:700; color:#475569; }
@@ -505,17 +663,24 @@
         #tab-order .visit-icon-btn.has-order:hover { background:#15803d !important; }
         #tab-order .visit-icon-btn.btn-visited { background:#facc15 !important; color:#713f12 !important; border-color:#eab308; }
         @media(max-width:760px) {
-          #tab-dashboard .dash-hero { padding:11px; }
-          #tab-dashboard .dash-hero-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
-          #tab-dashboard .dash-hero-metric { padding:8px; }
-          #tab-dashboard .dash-hero-metric .label, #tab-dashboard .dash-summary-item .label { font-size:9px; }
-          #tab-dashboard .dash-hero-metric .value, #tab-dashboard .dash-summary-item .value { font-size:14px; }
-          #tab-dashboard .dash-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
-          #tab-dashboard .dash-summary-item { padding:9px; }
+          #tab-dashboard .dash-hero { padding:8px; }
+          #tab-dashboard .dash-hero-top { margin-bottom:6px; padding-bottom:5px; }
+          #tab-dashboard .dash-hero-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; }
+          #tab-dashboard .dash-hero-metric { padding:6px; }
+          #tab-dashboard .dash-hero-metric .label, #tab-dashboard .dash-summary-item .label { font-size:8px; }
+          #tab-dashboard .dash-hero-metric .value, #tab-dashboard .dash-summary-item .value { font-size:12px; }
+          #tab-dashboard .dash-summary-grid,
+          #tab-dashboard .dash-summary-grid.dash-summary-3 { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+          #tab-dashboard .dash-summary-item { padding:8px 6px; }
+          .dash-target-level-card { padding:7px 8px; }
+          .dash-level-circle { width:38px; height:38px; font-size:11px; }
+          .dash-level-hint { font-size:9px; }
+          #tab-dashboard > .card:first-child { padding: 8px 10px; margin-bottom: 7px; }
         }
         @media(max-width:480px) {
-          #tab-dashboard .dash-hero-metric .value, #tab-dashboard .dash-summary-item .value { font-size:13px; }
+          #tab-dashboard .dash-hero-metric .value, #tab-dashboard .dash-summary-item .value { font-size:12px; }
           #tab-dashboard .dash-hero-metric .label, #tab-dashboard .dash-summary-item .label { font-size:9px; }
+          .dash-level-circle { width:36px; height:36px; font-size:10px; }
         }
         @media(max-width:480px) {
           #tab-stats .month-diff-card { padding:10px; }
@@ -589,11 +754,11 @@
             <div id="tab-dashboard" class="tab-panel">
                 <div class="card">
                     <div class="card-header">
-                        <span><i data-lucide="target" style="vertical-align: middle; margin-right: 5px;"></i> Thiết lập Mục tiêu Tháng</span>
+                        <span><i data-lucide="target" style="vertical-align: middle; margin-right: 5px;"></i> Thiết Lập Doanh Số Tháng</span>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <input type="month" id="dashboard-month" class="form-control" style="width: 180px;" onchange="onDashboardMonthChange()">
-                            <button class="btn btn-secondary btn-sm" id="btn-edit-targets" style="display:none;" onclick="showTargetForm()">
-                                <i data-lucide="edit"></i> Sửa mục tiêu
+                            <button class="btn btn-secondary btn-sm" id="btn-edit-targets" style="display:none;" onclick="showTargetForm()" title="Sửa mục tiêu" aria-label="Sửa mục tiêu">
+                                <i data-lucide="edit"></i>
                             </button>
                         </div>
                     </div>
@@ -613,10 +778,31 @@
                     </div>
                 </div>
 
+                <div class="dash-target-level-card">
+                    <div class="dash-target-level-title">Cam kết hoàn thành</div>
+                    <div class="dash-target-level-options" role="radiogroup" aria-label="Chọn mức khoán">
+                        <label class="dash-level-option">
+                            <input type="radio" name="dash-target-level" value="80" onchange="onDashboardTargetLevelChange()">
+                            <span class="dash-level-circle">80%</span>
+                            <span class="dash-level-hint" id="dash-level-amount-80">0 đ</span>
+                        </label>
+                        <label class="dash-level-option">
+                            <input type="radio" name="dash-target-level" value="100" checked onchange="onDashboardTargetLevelChange()">
+                            <span class="dash-level-circle">100%</span>
+                            <span class="dash-level-hint" id="dash-level-amount-100">0 đ</span>
+                        </label>
+                        <label class="dash-level-option">
+                            <input type="radio" name="dash-target-level" value="115" onchange="onDashboardTargetLevelChange()">
+                            <span class="dash-level-circle">115%</span>
+                            <span class="dash-level-hint" id="dash-level-amount-115">0 đ</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="dash-hero">
                     <div class="dash-hero-top">
                         <div>
-                            <div class="dash-hero-title">MỤC TIÊU NGÀY LÀM VIỆC CÒN LẠI</div>
+                            <div class="dash-hero-title">MỤC TIÊU CÒN LẠI</div>
                             <div class="dash-hero-sub" id="dash-working-info">-- ngày làm việc còn lại (Chủ nhật nghỉ)</div>
                         </div>
                     </div>
@@ -626,7 +812,7 @@
                             <div class="value" id="dash-remaining-amount">0 đ</div>
                         </div>
                         <div class="dash-hero-metric">
-                            <div class="label">Mục tiêu ngày (theo Thực tế)</div>
+                            <div class="label">Mục tiêu ngày (Thực tế)</div>
                             <div class="value" id="dash-daily-target">0 đ</div>
                         </div>
                         <div class="dash-hero-metric">
@@ -634,19 +820,19 @@
                             <div class="value" id="dash-remaining-dms">0 đ</div>
                         </div>
                         <div class="dash-hero-metric">
-                            <div class="label">Mục tiêu ngày (theo DMS)</div>
+                            <div class="label">Mục tiêu ngày (DMS)</div>
                             <div class="value" id="dash-daily-target-dms">0 đ</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="dash-summary-grid">
+                <div class="dash-summary-grid dash-summary-3">
                     <div class="dash-summary-item">
-                        <div class="label">Doanh số Khoán (Gốc)</div>
+                        <div class="label">Doanh số Khoán</div>
                         <div class="value" id="dash-khoan">0 đ</div>
                     </div>
                     <div class="dash-summary-item">
-                        <div class="label">Doanh số Thực tế (Net)</div>
+                        <div class="label">Doanh số thực tế</div>
                         <div class="value primary" id="dash-actual">0 đ</div>
                     </div>
                     <div class="dash-summary-item">
@@ -655,10 +841,13 @@
                     </div>
                 </div>
 
-                <div class="card"><div class="card-header"><span><i data-lucide="trending-up" style="vertical-align:middle"></i> Sản phẩm bán chạy trong tháng</span></div><div class="table-responsive"><table><thead><tr><th>#</th><th>Sản phẩm</th><th>SL quy đổi thùng</th></tr></thead><tbody id="best-selling-body"></tbody></table></div></div>
+                <div class="dash-two-col">
+                    <div class="card dash-half-card"><div class="card-header"><span><i data-lucide="trending-up" style="vertical-align:middle"></i> Sản phẩm bán chạy trong tháng</span></div><div class="table-responsive"><table><thead><tr><th>#</th><th>Sản phẩm</th><th>SL quy đổi thùng</th></tr></thead><tbody id="best-selling-body"></tbody></table></div></div>
+                    <div class="card dash-half-card"><div class="card-header"><span><i data-lucide="users" style="vertical-align:middle"></i> Top 10 khách hàng mua nhiều nhất</span></div><div class="table-responsive"><table><thead><tr><th>#</th><th>Khách hàng</th><th>Doanh số</th><th>Số đơn</th></tr></thead><tbody id="top-customers-body"></tbody></table></div></div>
+                </div>
                 <div class="dashboard-charts">
                     <div class="chart-card">
-                        <h3><i data-lucide="bar-chart-3"></i> Phân tích Trực quan Doanh số Tháng</h3>
+                        <h3><i data-lucide="bar-chart-3"></i> Biểu Đồ Trực Quan</h3>
                         <div class="dash-pct-row">
                             <span>Tỉ lệ Thực tế / Khoán: <strong id="chart-net-pct" class="percent-badge">0%</strong></span>
                             <span>Tỉ lệ DMS / Khoán: <strong id="chart-dms-pct" class="percent-badge">0%</strong></span>
@@ -672,9 +861,9 @@
 
             <div id="tab-order" class="tab-panel active">
                 <div class="card" id="order-customer-visit-card">
-                    <div class="card-header"><span><i data-lucide="map-pinned" style="vertical-align:middle"></i> Khách hàng cần viếng thăm</span><button type="button" id="order-customer-filter-toggle" class="btn btn-secondary btn-sm" onclick="toggleOrderCustomerFilters()" aria-expanded="false" aria-controls="order-customer-filter-panel"><i data-lucide="list-filter"></i> Lọc</button></div>
+                    <div class="card-header"><span><i data-lucide="map-pinned" style="vertical-align:middle"></i> Khách hàng</span><button type="button" id="order-customer-filter-toggle" class="btn btn-secondary btn-sm" onclick="toggleOrderCustomerFilters()" aria-expanded="false" aria-controls="order-customer-filter-panel"><i data-lucide="list-filter"></i> Lọc</button></div>
                     <div id="order-customer-filter-panel" class="order-customer-filter-panel" style="display:none">
-                        <div class="order-filter-field order-weekday-filter"><label>Ngày tuyến khách hàng (có thể chọn nhiều ngày)</label><div class="order-weekday-options">
+                        <div class="order-filter-field order-weekday-filter"><label>Chọn tuyến</label><div class="order-weekday-options">
                             <label><input type="checkbox" class="order-route-day" value="1" onchange="renderOrderCustomerVisits()"> T2</label><label><input type="checkbox" class="order-route-day" value="2" onchange="renderOrderCustomerVisits()"> T3</label><label><input type="checkbox" class="order-route-day" value="3" onchange="renderOrderCustomerVisits()"> T4</label><label><input type="checkbox" class="order-route-day" value="4" onchange="renderOrderCustomerVisits()"> T5</label><label><input type="checkbox" class="order-route-day" value="5" onchange="renderOrderCustomerVisits()"> T6</label><label><input type="checkbox" class="order-route-day" value="6" onchange="renderOrderCustomerVisits()"> T7</label><button type="button" class="btn btn-secondary btn-sm" onclick="setOrderRouteDays('all')">Tất cả</button><button type="button" class="btn btn-secondary btn-sm" onclick="setOrderRouteDays('none')">Bỏ chọn</button>
                         </div></div>
                         <div class="order-filter-field"><label for="order-customer-status-filter">Trạng thái khách hàng</label><select id="order-customer-status-filter" class="form-control" onchange="renderOrderCustomerVisits()"><option value="all">Tất cả khách hàng</option><option value="orders">Khách có đơn hôm nay</option><option value="visited">Đã viếng thăm hôm nay</option><option value="not-visited">Chưa viếng thăm hôm nay</option></select></div>
@@ -694,7 +883,8 @@
                     <div class="form-grid">
                         <div class="form-group" style="grid-column: span 2;">
                             <label>Tên Khách Hàng:</label>
-                            <input type="text" id="order-customer" class="form-control" placeholder="Nhập tên khách hàng & địa chỉ...">
+                            <input type="hidden" id="order-customer-id" value="">
+                            <input type="text" id="order-customer" class="form-control" placeholder="Nhập tên khách hàng & địa chỉ..." oninput="document.getElementById('order-customer-id').value=''; currentVisitCustomerId=null;">
                         </div>
                         <div class="form-group" style="grid-column: span 2;">
                             <label>Chọn Sản Phẩm:</label>
@@ -718,7 +908,7 @@
                             <input type="number" id="order-custom-price" class="form-control" placeholder="Mặc định từ kho" min="0" step="any">
                         </div>
                         <div class="form-group" style="grid-column: span 2;">
-                            <label>Màu sắc / Ghi chú:</label>
+                            <label>Màu sắc:</label>
                             <input type="text" id="order-color" class="form-control" placeholder="Ví dụ: trộn màu, Đỏ, Xanh...">
                         </div>
                     </div>
@@ -765,11 +955,11 @@
                                 <span class="metric-val highlight" id="temp-total-pay">0 đ</span>
                             </div>
                             <div class="metric-item" style="border-left: 1px solid var(--border-color); padding-left: 20px;">
-                                <span class="metric-label">CHÊNH LỆCH (BÁN - NET):</span>
+                                <span class="metric-label">CHÊNH LỆCH:</span>
                                 <span class="metric-val gain" id="temp-total-diff">0 đ</span>
                             </div>
                         </div>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-success" onclick="saveFinalOrder()"><i data-lucide="check-circle"></i> Lưu Đơn Hàng</button><button class="btn btn-primary" onclick="finishCustomerVisit()"><i data-lucide="flag"></i> Kết thúc viếng thăm</button></div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-success" onclick="saveFinalOrder()"><i data-lucide="check-circle"></i> Lưu Đơn Hàng</button><button class="btn btn-primary" onclick="finishCustomerVisit()"><i data-lucide="flag"></i> Kết thúc</button></div>
                     </div>
                 </div>
             </div>
@@ -847,7 +1037,7 @@
                         <div class="kpi-value" id="stats-total-sell">0 đ</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-label">DOANH SỐ THEO GIÁ NET</div>
+                        <div class="kpi-label">DOANH SỐ NET</div>
                         <div class="kpi-value" style="color: var(--primary);" id="stats-total-net">0 đ</div>
                     </div>
                     <div class="kpi-card">
@@ -915,7 +1105,7 @@
           </div>
           <p id="customer-sync-status" style="font-size:12px;color:#64748b;margin-top:4px">Đồng bộ Firestore đang khởi tạo…</p>
         </div>
-        <div class="card customer-list-card"><div class="card-header"><span>Danh sách viếng thăm theo tuyến</span><select id="customer-day-filter" class="form-control" style="width:auto" onchange="renderCustomers()"><option value="today">Hôm nay</option><option value="1">Thứ 2</option><option value="2">Thứ 3</option><option value="3">Thứ 4</option><option value="4">Thứ 5</option><option value="5">Thứ 6</option><option value="6">Thứ 7</option><option value="all">Tất cả các ngày</option></select></div><div id="customer-list"></div></div>
+        <div class="card customer-list-card"><div class="card-header"><span>Danh sách khách hàng theo tuyến</span><select id="customer-day-filter" class="form-control" style="width:auto" onchange="renderCustomers()"><option value="today">Hôm nay</option><option value="1">Thứ 2</option><option value="2">Thứ 3</option><option value="3">Thứ 4</option><option value="4">Thứ 5</option><option value="5">Thứ 6</option><option value="6">Thứ 7</option><option value="all">Tất cả các ngày</option></select></div><div id="customer-list"></div></div>
       </div>
             </div>
         </div>
@@ -950,15 +1140,15 @@
             <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr; margin-bottom: 15px;">
                 <div class="form-group"><label>Tên Khách Hàng:</label><input type="text" id="edit-order-customer" class="form-control"></div>
                 <div class="form-group"><label>Ngày Lên Đơn:</label><input type="date" id="edit-order-date" class="form-control"></div>
-                <div class="form-group"><label>Chiết Khấu Đơn (đ):</label><input type="number" id="edit-order-discount" class="form-control" value="0" step="any"></div>
+                <div class="form-group"><label>Chiết Khấu:</label><input type="number" id="edit-order-discount" class="form-control" value="0" step="any"></div>
                 <div class="form-group" style="grid-column: span 3;"><label>Ghi Chú Đơn Hàng:</label><input type="text" id="edit-order-note" class="form-control"></div>
             </div>
             <div class="form-grid" style="grid-template-columns:2fr .7fr .8fr 1fr 1.2fr;gap:8px;margin-bottom:12px;align-items:end">
-                <div class="form-group"><label>Thêm sản phẩm từ kho</label><select id="edit-add-product" class="form-control"></select></div>
+                <div class="form-group"><label>Thêm sản phẩm</label><select id="edit-add-product" class="form-control"></select></div>
                 <div class="form-group"><label>Số lượng</label><input id="edit-add-qty" type="number" min="0.1" step="any" value="1" class="form-control"></div>
                 <div class="form-group"><label>Đơn vị</label><select id="edit-add-unit" class="form-control"><option>Thùng</option><option>Hộp</option><option>Gói</option><option>Dây</option></select></div>
                 <div class="form-group"><label>Giá bán tùy chỉnh</label><input id="edit-add-price" type="number" min="0" class="form-control" placeholder="Theo kho"></div>
-                <div class="form-group"><label>Màu / ghi chú</label><div style="display:flex;gap:6px"><input id="edit-add-color" class="form-control" placeholder="Màu"><button class="btn btn-primary" onclick="addItemToEditedOrder()">Thêm</button></div></div>
+                <div class="form-group"><label>Màu</label><div style="display:flex;gap:6px"><input id="edit-add-color" class="form-control" placeholder="Màu"><button class="btn btn-primary" onclick="addItemToEditedOrder()">Thêm</button></div></div>
             </div>
             <div class="table-responsive">
                 <table>
@@ -968,7 +1158,7 @@
                             <th style="width:90px;">Số Lượng</th>
                             <th style="width:100px;">Đơn Vị</th>
                             <th style="width:110px;">Giá Bán</th>
-                            <th>Màu/Ghi chú</th>
+                            <th>Màu</th>
                             <th style="width:60px;">Xóa</th>
                         </tr>
                     </thead>
@@ -1415,8 +1605,12 @@
 
             let totalRaw = 0, totalDiff = 0;
             tempItems.forEach(item => { totalRaw += item.tienHangGoc; totalDiff += item.chenhLech; });
+            const orderCustomerId = currentVisitCustomerId != null
+                ? currentVisitCustomerId
+                : (document.getElementById('order-customer-id')?.value || null);
             const newOrder = {
                 id: Date.now(), date: today, customer: tempItems[0].customer,
+                customerId: orderCustomerId || null,
                 orderNote: orderNote,
                 items: [...tempItems], discount, totalRaw, totalPay: totalRaw - discount, totalDiff: totalDiff - discount
             };
@@ -1427,6 +1621,8 @@
 
             tempItems = [];
             document.getElementById('order-customer').value = "";
+            const orderCustIdEl = document.getElementById('order-customer-id');
+            if (orderCustIdEl) orderCustIdEl.value = "";
             document.getElementById('temp-customer-name').innerText = "";
             document.getElementById('temp-order-discount').value = "0";
             document.getElementById('temp-order-note').value = "";
@@ -1464,6 +1660,8 @@
             if (tempCard) tempCard.style.display = 'none';
             const customerInput = document.getElementById('order-customer');
             if (customerInput) customerInput.value = '';
+            const customerIdInput = document.getElementById('order-customer-id');
+            if (customerIdInput) customerIdInput.value = '';
             document.getElementById('temp-customer-name').innerText = '';
             document.getElementById('temp-order-discount').value = '0';
             document.getElementById('temp-order-note').value = '';
@@ -1475,18 +1673,32 @@
         }
 
         // Hàm lấy tên khách hàng và địa chỉ định dạng chữ nghiêng theo yêu cầu
-        function getCustomerDisplayString(customerName) {
-            if (!customerName) return '';
-            const cleanName = customerName.trim();
-            const found = customersData.find(c => String(c.name || '').trim().toLowerCase() === cleanName.toLowerCase());
+        // Ưu tiên khớp theo customerId để phân biệt khách trùng tên khác tuyến/địa chỉ
+        function getCustomerDisplayString(customerName, customerId) {
+            if (!customerName && customerId == null) return '';
+            const cleanName = String(customerName || '').trim();
+            let found = null;
+            if (customerId != null && customerId !== '') {
+                found = customersData.find(c =>
+                    String(customerIdOf(c)) === String(customerId) ||
+                    String(c.id) === String(customerId) ||
+                    String(c._firestoreDocId || '') === String(customerId)
+                );
+            }
+            // Chỉ fallback theo tên khi không có ID (đơn cũ). Nhiều khách trùng tên → không gắn địa chỉ để tránh nhầm.
+            if (!found && cleanName) {
+                const nameMatches = customersData.filter(c => String(c.name || '').trim().toLowerCase() === cleanName.toLowerCase());
+                if (nameMatches.length === 1) found = nameMatches[0];
+                else if (nameMatches.length > 1) return cleanName;
+            }
             if (found && found.address && found.address.trim() !== '') {
                 return `${found.name}, <i>${found.address.trim()}</i>`;
             }
-            return cleanName;
+            return cleanName || (found ? found.name : '');
         }
 
         function generateOrderHtml(order, index) {
-            let custDisplay = getCustomerDisplayString(order.customer);
+            let custDisplay = getCustomerDisplayString(order.customer, order.customerId);
             let html = `<div style="font-weight: 700; font-size: 15px; margin-bottom: 6px; color: #0f172a;">${index + 1}. ${custDisplay}</div>`;
             html += `<table class="history-print-table" style="border-collapse: collapse; border: none; font-family: Arial, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.3;">`;
             let totalRaw = 0;
@@ -1712,6 +1924,11 @@
             const order = ordersData.find(o => o.id == orderId);
             if (order) {
                 order.customer = customer;
+                // Giữ customerId cũ; nếu đổi tên sang khách khác duy nhất thì cập nhật ID
+                const nameMatches = customersData.filter(c => String(c.name || '').trim().toLowerCase() === customer.toLowerCase());
+                if (nameMatches.length === 1) {
+                    order.customerId = customerIdOf(nameMatches[0]);
+                }
                 order.date = date;
                 order.discount = discount;
                 order.orderNote = orderNote;
@@ -2024,12 +2241,39 @@
             document.getElementById('btn-edit-targets').style.display = 'inline-flex';
         }
 
+        function getSelectedTargetLevel() {
+            const checked = document.querySelector('input[name="dash-target-level"]:checked');
+            const val = checked ? Number(checked.value) : 100;
+            return [80, 100, 115].includes(val) ? val : 100;
+        }
+
+        function setSelectedTargetLevel(level) {
+            const val = [80, 100, 115].includes(Number(level)) ? String(level) : '100';
+            const radio = document.querySelector(`input[name="dash-target-level"][value="${val}"]`);
+            if (radio) radio.checked = true;
+        }
+
+        function onDashboardTargetLevelChange() {
+            const level = getSelectedTargetLevel();
+            // Lưu theo tháng + lưu mức gần nhất để reload trang vẫn giữ
+            safeSetItem('dms_target_level_last', String(level));
+            const monthKey = document.getElementById('dashboard-month')?.value;
+            if (monthKey) {
+                if (!targetsData[monthKey]) targetsData[monthKey] = { khoan: 0, dmsInput: 0, targetLevel: 100 };
+                targetsData[monthKey].targetLevel = level;
+                safeSetItem('dms_targets', JSON.stringify(targetsData));
+                if (window.saveTargetToCloud) window.saveTargetToCloud(monthKey, targetsData[monthKey]);
+            }
+            renderDashboard();
+        }
+
         function saveDashboardTargets() {
             const monthKey = document.getElementById('dashboard-month').value;
             if (!monthKey) return alert("Vui lòng chọn tháng!");
             const khoan = Math.round(parseVnNum(document.getElementById('target-khoan').value));
             const dmsInput = Math.round(parseVnNum(document.getElementById('target-dms-input').value));
-            targetsData[monthKey] = { khoan, dmsInput };
+            const targetLevel = getSelectedTargetLevel();
+            targetsData[monthKey] = { ...(targetsData[monthKey] || {}), khoan, dmsInput, targetLevel };
             safeSetItem('dms_targets', JSON.stringify(targetsData));
             if (window.saveTargetToCloud) window.saveTargetToCloud(monthKey, targetsData[monthKey]);
             alert("Đã lưu mục tiêu tháng " + monthKey);
@@ -2056,11 +2300,18 @@
                 document.getElementById('dashboard-month').value = monthKey;
             }
 
-            const targets = targetsData[monthKey] || { khoan: 0, dmsInput: 0 };
+            const targets = targetsData[monthKey] || { khoan: 0, dmsInput: 0, targetLevel: 100 };
             const hasTargets = (targets.khoan > 0 || targets.dmsInput > 0);
+            // Mặc định 100%; nếu đã chọn % khác thì lấy từ tháng / mức gần nhất đã lưu
+            const lastLevelRaw = Number(safeGetItem('dms_target_level_last'));
+            const lastLevel = [80, 100, 115].includes(lastLevelRaw) ? lastLevelRaw : 100;
+            const restoredLevel = [80, 100, 115].includes(Number(targets.targetLevel))
+                ? Number(targets.targetLevel)
+                : lastLevel;
 
             document.getElementById('target-khoan').value = targets.khoan || '';
             document.getElementById('target-dms-input').value = targets.dmsInput || '';
+            setSelectedTargetLevel(restoredLevel);
 
             if (hasTargets) hideTargetForm();
             else showTargetForm();
@@ -2069,13 +2320,16 @@
             const dmsInput = Math.round(targets.dmsInput || 0);
             const actualNetRaw = Math.round(getMonthActualNet(monthKey));
             const actualNet = actualNetRaw * 1000;
+            const targetLevel = getSelectedTargetLevel();
+            // Mức khoán hiệu lực theo % được chọn (80 / 100 / 115)
+            const effectiveKhoan = Math.round(khoan * targetLevel / 100);
 
             const pctNet = khoan > 0 ? (actualNet / khoan) * 100 : 0;
             const pctDms = khoan > 0 ? (dmsInput / khoan) * 100 : 0;
 
             const workInfo = getMonthWorkingInfo(monthKey);
-            const remainingAmount = Math.max(0, khoan - actualNet);
-            const remainingDms = Math.max(0, khoan - dmsInput);
+            const remainingAmount = Math.max(0, effectiveKhoan - actualNet);
+            const remainingDms = Math.max(0, effectiveKhoan - dmsInput);
             const dailyTarget = workInfo.remainingWorking > 0 ? Math.round(remainingAmount / workInfo.remainingWorking) : 0;
             const dailyTargetDms = workInfo.remainingWorking > 0 ? Math.round(remainingDms / workInfo.remainingWorking) : 0;
 
@@ -2087,7 +2341,14 @@
             document.getElementById('dash-remaining-dms').innerText = formatRoundNum(remainingDms) + " đ";
             document.getElementById('dash-daily-target-dms').innerText = formatRoundNum(dailyTargetDms) + " đ";
             document.getElementById('dash-working-info').innerText =
-                `${workInfo.remainingWorking} ngày làm việc còn lại / ${workInfo.totalWorking} ngày trong tháng · Chủ nhật & Lễ nghỉ`;
+                `${workInfo.remainingWorking} ngày làm việc còn lại / ${workInfo.totalWorking} ngày trong tháng · Chủ nhật & Lễ nghỉ · Mục tiêu ${targetLevel}% khoán`;
+            // Hiện doanh số tương đương dưới mỗi mức %
+            const amt80 = document.getElementById('dash-level-amount-80');
+            const amt100 = document.getElementById('dash-level-amount-100');
+            const amt115 = document.getElementById('dash-level-amount-115');
+            if (amt80) amt80.textContent = formatRoundNum(Math.round(khoan * 0.8)) + ' đ';
+            if (amt100) amt100.textContent = formatRoundNum(khoan) + ' đ';
+            if (amt115) amt115.textContent = formatRoundNum(Math.round(khoan * 1.15)) + ' đ';
 
             const netPctEl = document.getElementById('chart-net-pct');
             const dmsPctEl = document.getElementById('chart-dms-pct');
@@ -2149,8 +2410,50 @@
                         ? `${formatDisplayNum(equivalent)} T${v.looseQty ? ` <span class="best-selling-detail">(${formatDisplayNum(v.cartonQty)}T + ${formatDisplayNum(v.looseQty)} lẻ)</span>` : ''}`
                         : (v.cartonQty ? `${formatDisplayNum(v.cartonQty)} T` : 'Thiếu QC/T');
                     return { name, equivalent, detail, hasUnknownPack: v.hasUnknownPack };
-                }).sort((a,b) => b.equivalent - a.equivalent).slice(0,8);
+                }).sort((a,b) => b.equivalent - a.equivalent).slice(0,10);
                 bestBody.innerHTML = top.length ? top.map((v,i)=>`<tr><td>${i+1}</td><td><strong>${v.name}</strong></td><td>${v.detail}${v.hasUnknownPack && v.equivalent > 0 ? '<div class="best-selling-detail">Có dòng lẻ chưa quy đổi do thiếu QC/T</div>' : ''}</td></tr>`).join('') : '<tr><td colspan="3" style="text-align:center;color:#64748b">Chưa có dữ liệu bán trong tháng này.</td></tr>';
+            }
+
+            // Top 10 khách hàng theo doanh số (tiền phải thu) trong tháng đang chọn
+            // Ưu tiên gom theo customerId để phân biệt khách trùng tên
+            const topCustBody = document.getElementById('top-customers-body');
+            if (topCustBody) {
+                const custSums = {};
+                ordersData.filter(o => (o.date || '').startsWith(monthKey)).forEach(order => {
+                    const pay = order.totalPay != null
+                        ? Number(order.totalPay)
+                        : (Number(order.totalRaw || 0) - Number(order.discount || 0));
+                    const cid = order.customerId != null ? String(order.customerId) : null;
+                    const cname = String(order.customer || 'Khách lẻ').trim();
+                    const key = cid ? `id:${cid}` : `name:${cname.toLowerCase()}`;
+                    if (!custSums[key]) {
+                        let displayName = cname;
+                        let address = '';
+                        if (cid) {
+                            const found = customersData.find(c =>
+                                String(customerIdOf(c)) === cid ||
+                                String(c.id) === cid ||
+                                String(c._firestoreDocId || '') === cid
+                            );
+                            if (found) {
+                                displayName = found.name || cname;
+                                address = found.address || '';
+                            }
+                        }
+                        custSums[key] = { name: displayName, address, total: 0, orders: 0 };
+                    }
+                    custSums[key].total += isNaN(pay) ? 0 : pay;
+                    custSums[key].orders += 1;
+                });
+                const topCust = Object.values(custSums)
+                    .sort((a, b) => b.total - a.total)
+                    .slice(0, 10);
+                topCustBody.innerHTML = topCust.length
+                    ? topCust.map((v, i) => {
+                        const addr = v.address ? ` <span class="best-selling-detail">(${v.address})</span>` : '';
+                        return `<tr><td>${i + 1}</td><td><strong>${v.name}</strong>${addr}</td><td><strong>${formatDisplayNum(v.total)} đ</strong></td><td>${v.orders}</td></tr>`;
+                    }).join('')
+                    : '<tr><td colspan="4" style="text-align:center;color:#64748b">Chưa có dữ liệu bán trong tháng này.</td></tr>';
             }
             safeCreateIcons();
         }
@@ -2340,12 +2643,18 @@
             safeCreateIcons();
         }
         function customerHasOrderOnDate(customer, dateKey = localDateKey()) {
+            const cid = customerIdOf(customer);
             const name = String(customer?.name || '').trim().toLocaleLowerCase('vi');
-            if (!name) return false;
-            return ordersData.some(order =>
-                String(order.date || '') === dateKey &&
-                String(order.customer || '').trim().toLocaleLowerCase('vi') === name
-            );
+            if (!cid && !name) return false;
+            return ordersData.some(order => {
+                if (String(order.date || '') !== dateKey) return false;
+                if (cid != null && order.customerId != null && String(order.customerId) === String(cid)) return true;
+                // Chỉ khớp theo tên khi đơn không có customerId (đơn cũ) và tên duy nhất
+                if (order.customerId == null && name) {
+                    return String(order.customer || '').trim().toLocaleLowerCase('vi') === name;
+                }
+                return false;
+            });
         }
         function customerHasOrderToday(customer) { return customerHasOrderOnDate(customer, localDateKey()); }
         function toggleOrderCustomerFilters(forceOpen) {
@@ -2445,7 +2754,7 @@
             if (status) { status.textContent = 'Đã xóa khách hàng: ' + customer.name; status.style.color = '#15803d'; }
         }
         function visitCustomer(id){
-            const c=customersData.find(x=>String(x.id)===String(id)); if(!c)return;
+            const c=customersData.find(x=>String(x.id)===String(id) || String(customerIdOf(x))===String(id)); if(!c)return;
             currentVisitCustomerId = customerIdOf(c) ?? id;
             switchTab('tab-order',document.querySelector('.nav-item[onclick*="tab-order"]'));
             const form=document.getElementById('order-entry-form-card');
@@ -2453,6 +2762,8 @@
             if(form) form.style.display='block';
             if(tempCard) tempCard.style.display='block';
             document.getElementById('order-customer').value=c.name;
+            const custIdEl=document.getElementById('order-customer-id');
+            if(custIdEl) custIdEl.value=String(currentVisitCustomerId ?? '');
             if(form) form.scrollIntoView({behavior:'smooth',block:'start'});
             const product=document.getElementById('order-product'); if(product) product.focus({preventScroll:true});
         }
@@ -2622,7 +2933,18 @@
                 const cloudTargets = {};
                 snapshot.forEach((d) => {
                     const data = d.data(); const key = data.month || d.id;
-                    if (key) cloudTargets[key] = { khoan: data.khoan || 0, dmsInput: data.dmsInput || 0 };
+                    if (key) {
+                        const localLevel = targetsData[key]?.targetLevel;
+                        const cloudLevel = Number(data.targetLevel);
+                        const level = [80, 100, 115].includes(cloudLevel)
+                            ? cloudLevel
+                            : ([80, 100, 115].includes(Number(localLevel)) ? Number(localLevel) : 100);
+                        cloudTargets[key] = {
+                            khoan: data.khoan || 0,
+                            dmsInput: data.dmsInput || 0,
+                            targetLevel: level
+                        };
+                    }
                 });
                 if (Object.keys(cloudTargets).length > 0) {
                     targetsData = { ...targetsData, ...cloudTargets };
