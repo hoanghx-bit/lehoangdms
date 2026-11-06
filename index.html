@@ -10,14 +10,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DMS Pro">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1e293b">
+    <meta name="theme-color" content="#5b21b6">
     
-    <!-- App Icon cho iPhone (iOS) & Android (Favicon) -->
-    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%231d4ed8'/><path d='M140 160h232c11 0 20 9 20 20v152c0 11-9 20-20 20H140c-11 0-20-9-20-20V180c0-11 9-20 20-20z' fill='none' stroke='%23ffffff' stroke-width='24' stroke-linejoin='round'/><path d='M180 236h152M180 292h112' stroke='%23ffffff' stroke-width='24' stroke-linecap='round'/><circle cx='340' cy='292' r='14' fill='%2338bdf8'/></svg>">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%231d4ed8'/><path d='M140 160h232c11 0 20 9 20 20v152c0 11-9 20-20 20H140c-11 0-20-9-20-20V180c0-11 9-20 20-20z' fill='none' stroke='%23ffffff' stroke-width='24' stroke-linejoin='round'/><path d='M180 236h152M180 292h112' stroke='%23ffffff' stroke-width='24' stroke-linecap='round'/><circle cx='340' cy='292' r='14' fill='%2338bdf8'/></svg>">
-
-    <!-- Web App Manifest (Giúp Android nhận diện Icon App chuẩn 100%) -->
-    <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22DMS%20Pro%20System%22,%22short_name%22:%22DMS%20Pro%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%231e293b%22,%22icons%22:[{%22src%22:%22data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%231d4ed8'/><path d='M140 160h232c11 0 20 9 20 20v152c0 11-9 20-20 20H140c-11 0-20-9-20-20V180c0-11 9-20 20-20z' fill='none' stroke='%23ffffff' stroke-width='24' stroke-linejoin='round'/><path d='M180 236h152M180 292h112' stroke='%23ffffff' stroke-width='24' stroke-linecap='round'/><circle cx='340' cy='292' r='14' fill='%2338bdf8'/></svg>%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any%20maskable%22}]}">
+    <!-- DMS PRO app icons: PNG for iOS/Android and external manifest for install shortcuts -->
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+    <link rel="manifest" href="./manifest.webmanifest">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -745,7 +744,50 @@
             .header-title { font-size:12px; }
             .user-badge { font-size:10px; padding:4px 6px; }
         }
-    </style>
+
+        /* Customer directory: compact cards; actions live only in the detail dialog */
+        #tab-customers .customer-layout { grid-template-columns:minmax(220px,.72fr) minmax(320px,1.6fr); align-items:start; }
+        #tab-customers .customer-list-card { min-width:0; }
+        #tab-customers #customer-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:9px; padding:2px; }
+        .customer-tile { display:flex; flex-direction:column; gap:7px; width:100%; min-width:0; padding:13px; text-align:left; border:1px solid var(--border-color); border-radius:11px; background:var(--card-bg); color:var(--text-main); cursor:pointer; box-shadow:var(--app-shadow); transition:border-color .16s,transform .16s,box-shadow .16s; }
+        .customer-tile:hover { border-color:#8b5cf6; transform:translateY(-1px); box-shadow:0 6px 16px rgba(79,70,229,.10); }
+        .customer-tile.near { border-left:3px solid #8b5cf6; }
+        .customer-tile-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+        .customer-tile-top strong { font-size:14px; line-height:1.35; overflow-wrap:anywhere; }
+        .customer-tile-top svg { width:16px; height:16px; flex-shrink:0; color:#8b5cf6; }
+        .customer-tile-address { color:var(--text-muted); font-size:12px; line-height:1.4; overflow-wrap:anywhere; }
+        .customer-tile-meta { display:flex; flex-wrap:wrap; gap:9px; color:var(--text-muted); font-size:11px; }
+        .customer-tile-meta span { display:inline-flex; align-items:center; gap:4px; }
+        .customer-tile-meta svg { width:13px; height:13px; }
+        .customer-near-tag { align-self:flex-start; padding:3px 7px; border-radius:20px; color:#6d28d9; background:#ede9fe; font-size:10px; font-weight:700; }
+        #customer-detail-modal { z-index:1300; }
+        #customer-detail-modal .modal-content { max-width:560px; }
+        .customer-detail-info { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:10px 0 18px; }
+        .customer-detail-info > div { min-width:0; padding:10px; border:1px solid var(--border-color); border-radius:9px; background:var(--bg-body); }
+        .customer-detail-info span { display:block; margin-bottom:4px; color:var(--text-muted); font-size:11px; }
+        .customer-detail-info strong { display:block; font-size:13px; line-height:1.4; overflow-wrap:anywhere; }
+        .customer-detail-section-title { margin:8px 0; font-size:13px; font-weight:800; color:var(--text-main); }
+        .customer-recent-orders { display:flex; flex-direction:column; gap:7px; max-height:36vh; overflow:auto; }
+        .customer-order-mini { padding:10px; border:1px solid var(--border-color); border-radius:9px; background:var(--card-bg); }
+        .customer-order-mini-head { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; }
+        .customer-order-mini-head strong:last-child { color:var(--primary); white-space:nowrap; }
+        .customer-order-mini-items { margin-top:5px; color:var(--text-muted); font-size:11px; line-height:1.5; }
+        .customer-detail-empty { padding:16px; text-align:center; color:var(--text-muted); background:var(--bg-body); border:1px dashed var(--border-color); border-radius:9px; font-size:12px; }
+        .customer-detail-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:16px; }
+        .customer-detail-actions .btn { justify-content:center; padding:9px 7px; font-size:12px; }
+        @media(max-width:760px) {
+            #tab-customers .customer-layout { grid-template-columns:1fr; }
+            #tab-customers #customer-list { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+            .customer-tile { padding:10px; }
+            .customer-tile-top strong { font-size:12px; }
+            .customer-tile-address { font-size:11px; }
+            .customer-tile-meta { gap:5px; font-size:10px; }
+            .customer-detail-info { gap:7px; }
+            .customer-detail-actions { grid-template-columns:1fr; }
+            .customer-detail-actions .btn { min-height:38px; }
+        }
+        @media(max-width:360px) { #tab-customers #customer-list { grid-template-columns:1fr; } }
+\n    </style>
 </head>
 <body>
     <div class="sidebar">
@@ -1122,6 +1164,22 @@
         </div>
         <div class="card customer-list-card"><div class="card-header"><span>Danh sách khách hàng theo tuyến</span><select id="customer-day-filter" class="form-control" style="width:auto" onchange="renderCustomers()"><option value="today">Hôm nay</option><option value="1">Thứ 2</option><option value="2">Thứ 3</option><option value="3">Thứ 4</option><option value="4">Thứ 5</option><option value="5">Thứ 6</option><option value="6">Thứ 7</option><option value="all">Tất cả các ngày</option></select></div><div id="customer-list"></div></div>
       </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="customer-detail-modal" onclick="if(event.target===this)closeCustomerDetail()">
+        <div class="modal-content">
+            <div class="card-header">
+                <span id="customer-detail-title">Chi tiết khách hàng</span>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeCustomerDetail()" aria-label="Đóng"><i data-lucide="x"></i></button>
+            </div>
+            <div id="customer-detail-body"></div>
+            <div class="customer-detail-actions">
+                <button type="button" class="btn btn-secondary" onclick="editCustomer(activeCustomerDetailId)"><i data-lucide="pencil"></i> Chỉnh sửa</button>
+                <button type="button" class="btn btn-primary" onclick="selectCustomerForLocation(activeCustomerDetailId)"><i data-lucide="map-pin"></i> Ghim vị trí</button>
+                <button type="button" class="btn btn-danger" onclick="deleteCustomer(activeCustomerDetailId)"><i data-lucide="trash-2"></i> Xóa khách hàng</button>
             </div>
         </div>
     </div>
@@ -2522,8 +2580,9 @@
             if(saveBtn) saveBtn.innerHTML='<i data-lucide="user-plus"></i> Lưu khách hàng';
         }
         function editCustomer(id) {
-            const customer=customersData.find(c=>String(customerIdOf(c))===String(id));
+            const customer=customersData.find(c=>String(customerIdOf(c))===String(id) || String(c._firestoreDocId || '')===String(id));
             if(!customer) return alert('Không tìm thấy khách hàng cần sửa.');
+            closeCustomerDetail();
             document.getElementById('cust-edit-id').value=String(customerIdOf(customer));
             document.getElementById('cust-name').value=customer.name||'';
             document.getElementById('cust-address').value=customer.address||'';
@@ -2535,8 +2594,8 @@
             const saveBtn=document.getElementById('cust-save-btn');
             if(saveBtn) saveBtn.innerHTML='<i data-lucide="save"></i> Cập nhật khách hàng';
             safeCreateIcons();
-            document.getElementById('cust-name')?.focus();
             document.getElementById('customer-form-wrap')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+            document.getElementById('cust-name')?.focus();
         }
         function saveCustomer() {
             const name = document.getElementById('cust-name').value.trim();
@@ -2649,12 +2708,72 @@
                 .map(c => ({...c, day:normalizedCustomerDay(c), distance:currentPosition && c.lat != null && c.lon != null ? haversine(currentPosition,{lat:Number(c.lat),lon:Number(c.lon)}) : Infinity}))
                 .sort((a,b) => a.distance-b.distance);
         }
+        let activeCustomerDetailId = null;
+        function customerHtmlEscape(value) {
+            return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+        function customerOrdersForProfile(customer) {
+            const cid = customerIdOf(customer);
+            const name = String(customer?.name || '').trim().toLocaleLowerCase('vi');
+            const sameNameCount = customersData.filter(c => String(c.name || '').trim().toLocaleLowerCase('vi') === name).length;
+            return ordersData.filter(order => {
+                if (cid != null && order.customerId != null) return String(order.customerId) === String(cid);
+                // Đơn cũ chưa có customerId chỉ được gắn theo tên nếu tên khách là duy nhất.
+                return order.customerId == null && sameNameCount === 1 && name &&
+                    String(order.customer || '').trim().toLocaleLowerCase('vi') === name;
+            }).sort((a,b) => String(b.date || '').localeCompare(String(a.date || '')) || Number(b.id || 0)-Number(a.id || 0)).slice(0,5);
+        }
+        function openCustomerDetail(id) {
+            const customer = customersData.find(c => String(customerIdOf(c)) === String(id) || String(c._firestoreDocId || '') === String(id));
+            if (!customer) return;
+            activeCustomerDetailId = String(customerIdOf(customer) ?? id);
+            renderCustomerDetail();
+            document.getElementById('customer-detail-modal')?.classList.add('active');
+        }
+        function closeCustomerDetail() {
+            document.getElementById('customer-detail-modal')?.classList.remove('active');
+            activeCustomerDetailId = null;
+        }
+        function renderCustomerDetail() {
+            const customer = customersData.find(c => String(customerIdOf(c)) === String(activeCustomerDetailId) || String(c._firestoreDocId || '') === String(activeCustomerDetailId));
+            const body = document.getElementById('customer-detail-body');
+            const title = document.getElementById('customer-detail-title');
+            if (!customer || !body) { closeCustomerDetail(); return; }
+            if (title) title.textContent = customer.name || 'Chi tiết khách hàng';
+            const day = normalizedCustomerDay(customer);
+            const distance = currentPosition && customer.lat != null && customer.lon != null
+                ? haversine(currentPosition,{lat:Number(customer.lat),lon:Number(customer.lon)}) : Infinity;
+            const orders = customerOrdersForProfile(customer);
+            const recentHtml = orders.length ? orders.map((order, index) => {
+                const items = (order.items || []).map(it => `${customerHtmlEscape(it.productName || 'Sản phẩm')} · ${customerHtmlEscape(formatDisplayNum(it.qty))}${(it.unit === 'Thùng' || it.unit === 'T') ? 'T' : ' '+customerHtmlEscape(it.unit || '')}`).join('<br>');
+                const total = Number(order.totalPay ?? order.totalRaw ?? 0);
+                return `<div class="customer-order-mini">
+                    <div class="customer-order-mini-head"><strong>${index+1}. ${customerHtmlEscape(order.date || 'Không rõ ngày')}</strong><strong>${formatRoundNum(total)} đ</strong></div>
+                    <div class="customer-order-mini-items">${items || 'Không có chi tiết sản phẩm'}</div>
+                </div>`;
+            }).join('') : '<div class="customer-detail-empty">Chưa có đơn hàng phù hợp trong lịch sử.</div>';
+            body.innerHTML = `
+                <div class="customer-detail-info">
+                    <div><span>Địa chỉ</span><strong>${customerHtmlEscape(customer.address || 'Chưa cập nhật')}</strong></div>
+                    <div><span>Điện thoại</span><strong>${customerHtmlEscape(customer.phone || 'Chưa cập nhật')}</strong></div>
+                    <div><span>Tuyến viếng thăm</span><strong>${Number.isFinite(day) ? 'Thứ '+(day===6?'7':day+1) : 'Chưa đặt tuyến'}</strong></div>
+                    <div><span>Vị trí GPS</span><strong>${customer.lat != null && customer.lon != null ? (Number.isFinite(distance) ? (distance<1000?Math.round(distance)+' m':(distance/1000).toFixed(1)+' km')+' từ thiết bị' : 'Đã ghim tọa độ') : 'Chưa ghim vị trí'}</strong></div>
+                </div>
+                <div class="customer-detail-section-title">5 đơn hàng gần nhất</div>
+                <div class="customer-recent-orders">${recentHtml}</div>`;
+            safeCreateIcons();
+        }
         function renderCustomers() {
             const list=document.getElementById('customer-list'); if(!list) return;
             const filter=document.getElementById('customer-day-filter');
             if(filter && !filter.dataset.initialized){filter.value='today';filter.dataset.initialized='1';}
             const rows=customerRowsForFilter(filter ? filter.value : 'today');
-            list.innerHTML=rows.length?rows.map(c=>`<div class="customer-row ${c.distance<=100?'near':''}"><div><strong>${c.name}</strong><div class="customer-meta">${c.address||'Chưa có địa chỉ'}${c.phone?' · '+c.phone:''}</div><div class="customer-meta">Tuyến: ${Number.isFinite(c.day)?('Thứ '+(c.day===6?'7':c.day+1)):'Chưa đặt ngày'} · ${Number.isFinite(c.distance)?(c.distance<1000?Math.round(c.distance)+' m':(c.distance/1000).toFixed(1)+' km'):'Chưa có khoảng cách'} ${c.distance<=100?' · GẦN VỊ TRÍ HIỆN TẠI':''}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" onclick="editCustomer('${c.id}')"><i data-lucide="pencil"></i> Sửa</button><button class="btn btn-secondary btn-sm" onclick="selectCustomerForLocation('${c.id}')">Ghim vị trí khách</button><button class="btn btn-primary btn-sm" onclick="visitCustomer('${c.id}')"><i data-lucide="map-pin-check"></i> Viếng thăm</button><button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">×</button></div></div>`).join(''):'<div style="padding:20px;color:#64748b;text-align:center">Chưa có khách hàng cho lựa chọn này.</div>';
+            list.innerHTML=rows.length?rows.map(c=>`<button type="button" class="customer-tile ${c.distance<=100?'near':''}" onclick="openCustomerDetail('${customerHtmlEscape(c.id)}')" aria-label="Mở chi tiết ${customerHtmlEscape(c.name)}">
+                <span class="customer-tile-top"><strong>${customerHtmlEscape(c.name)}</strong><i data-lucide="chevron-right"></i></span>
+                <span class="customer-tile-address">${customerHtmlEscape(c.address||'Chưa có địa chỉ')}</span>
+                <span class="customer-tile-meta"><span><i data-lucide="calendar-days"></i> Tuyến ${Number.isFinite(c.day)?('Thứ '+(c.day===6?'7':c.day+1)):'chưa đặt'}</span><span><i data-lucide="map-pin"></i> ${Number.isFinite(c.distance)?(c.distance<1000?Math.round(c.distance)+' m':(c.distance/1000).toFixed(1)+' km'):'Chưa có khoảng cách'}</span></span>
+                ${c.distance<=100?'<span class="customer-near-tag">Gần vị trí hiện tại</span>':''}
+            </button>`).join(''):'<div style="padding:20px;color:#64748b;text-align:center">Chưa có khách hàng cho lựa chọn này.</div>';
             safeCreateIcons();
         }
         function customerHasOrderOnDate(customer, dateKey = localDateKey()) {
@@ -2737,12 +2856,15 @@
             safeCreateIcons();
         }
         function selectCustomerForLocation(id){
-            const c=customersData.find(x=>String(x.id)===String(id)); if(!c)return;
+            const c=customersData.find(x=>String(customerIdOf(x))===String(id) || String(x._firestoreDocId || '')===String(id)); if(!c)return;
             getPosition(()=>{
                 c.lat=currentPosition.lat; c.lon=currentPosition.lon;
                 safeSetItem('dms_customers',JSON.stringify(customersData));
                 if(window.saveCustomerToCloud) window.saveCustomerToCloud(c);
                 renderCustomers(); renderOrderCustomerVisits();
+                if(activeCustomerDetailId) renderCustomerDetail();
+                const status=document.getElementById('customer-sync-status');
+                if(status) status.textContent='Đã ghim vị trí GPS cho khách hàng: '+c.name+'; đang đồng bộ Firestore…';
                 alert('Đã ghim vị trí riêng cho khách hàng: ' + c.name);
             });
         }
@@ -2757,6 +2879,7 @@
             safeSetItem('dms_deleted_customer_ids', JSON.stringify([...tombstones]));
             customersData = customersData.filter(c => String(customerIdOf(c)) !== String(id) && String(c._firestoreDocId || '') !== String(id));
             safeSetItem('dms_customers', JSON.stringify(customersData));
+            closeCustomerDetail();
             renderCustomers(); renderOrderCustomerVisits();
             if (status) { status.textContent = 'Đang xóa khách hàng trên Firestore…'; status.style.color = '#64748b'; }
             if (window.deleteCustomerFromCloud) {
