@@ -805,6 +805,7 @@
             .customer-tile { padding:10px; }
             .customer-tile-top strong { font-size:12px; }
             .customer-tile-address { font-size:11px; }
+            #tab-order .customer-month-sales { font-size:12px; }
             .customer-tile-meta { gap:5px; font-size:10px; }
             .customer-detail-info { gap:7px; }
             .customer-detail-actions { grid-template-columns:1fr; }
@@ -812,10 +813,11 @@
         }
         @media(max-width:360px) { #tab-customers #customer-list { grid-template-columns:1fr; } }
 \n
-        /* Doanh số tháng trong thẻ khách hàng tab Lên đơn */
-        #tab-order .customer-month-sales { display:flex; align-items:center; gap:4px; margin-top:3px; color:#64748b; font-size:12px; line-height:1.35; font-weight:400; }
-        #tab-order .customer-month-sales svg { width:12px; height:12px; flex:0 0 12px; color:inherit; }
-        #tab-order .customer-month-sales strong { font-weight:400; color:inherit; }
+        /* Doanh số tháng trong thẻ khách hàng tab Lên đơn — cùng cỡ chữ với dòng địa chỉ (.customer-meta = 12px) */
+        #tab-order .customer-month-sales { display:flex; align-items:center; gap:4px; margin-top:3px; color:#14532d; font-size:12px; line-height:1.35; font-weight:400; }
+        #tab-order .customer-month-sales svg { width:11px; height:11px; flex:0 0 11px; color:inherit; }
+        #tab-order .customer-month-sales strong { font-weight:400; color:#14532d; font-size:inherit; }
+        #tab-dashboard .top-customers-table .top-customer-address { font-size:6px; }
         /* Bảng Top 10 khách hàng: giữ tên + địa chỉ trên một dòng, doanh số sát mép phải */
         #tab-dashboard .top-customers-table th:nth-child(2),
         #tab-dashboard .top-customers-table td:nth-child(2) { white-space:nowrap; }
@@ -2557,7 +2559,7 @@
                     .slice(0, 10);
                 topCustBody.innerHTML = topCust.length
                     ? topCust.map((v, i) => {
-                        const addr = v.address ? ` <span class="best-selling-detail">(${v.address})</span>` : '';
+                        const addr = v.address ? ` <span class="top-customer-address">(${v.address})</span>` : '';
                         return `<tr><td>${i + 1}</td><td><strong>${v.name}</strong>${addr}</td><td><strong>${formatDisplayNum(v.total)} đ</strong></td><td>${v.orders}</td></tr>`;
                     }).join('')
                     : '<tr><td colspan="4" style="text-align:center;color:#64748b">Chưa có dữ liệu bán trong tháng này.</td></tr>';
@@ -2897,7 +2899,7 @@
                     <div style="min-width:0;flex:1">
                         <strong>${c.name}</strong>
                         <div class="customer-meta">${c.address||'Chưa có địa chỉ'}${c.phone?' · '+c.phone:''}</div>
-                        <div class="customer-month-sales"><i data-lucide="wallet"></i><span>DS: <strong>${formatDisplayNum(getCustomerMonthSales(c))} đ</strong></span></div>
+                        <div class="customer-month-sales"><i data-lucide="wallet"></i><span>DS: <strong>${formatDisplayNum(getCustomerMonthSales(c))}</strong></span></div>
                         <div class="customer-meta">Tuyến: ${Number.isFinite(c.day)?('Thứ '+(c.day===6?'7':c.day+1)):'Chưa đặt ngày'} · ${Number.isFinite(c.distance)?(c.distance<1000?Math.round(c.distance)+' m':(c.distance/1000).toFixed(1)+' km'):'Chưa có khoảng cách'} ${c.distance<=100?' · GẦN VỊ TRÍ HIỆN TẠI':''}</div>
                     </div>
                     <button class="btn ${buttonClass} btn-sm visit-icon-btn" title="${buttonTitle}" aria-label="${buttonTitle}" onclick="visitCustomer('${c.id}')">
